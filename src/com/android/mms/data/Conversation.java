@@ -755,17 +755,14 @@ public class Conversation {
     }
 
     public static void markAllConversationsAsSeen(final Context context) {
-        markAllConversationsAsSeen(context,false);
-    }
-    public static void markAllConversationsAsSeen(final Context context, final boolean alsoRead) {
         if (DEBUG) {
             LogTag.debug("Conversation.markAllConversationsAsSeen");
         }
 
         new Thread(new Runnable() {
             public void run() {
-                blockingMarkAllSmsMessagesAsSeen(context,alsoRead);
-                blockingMarkAllMmsMessagesAsSeen(context,alsoRead);
+                blockingMarkAllSmsMessagesAsSeen(context);
+                blockingMarkAllMmsMessagesAsSeen(context);
 
                 // Always update notifications regardless of the read state.
                 MessagingNotification.blockingUpdateAllNotifications(context);
@@ -773,15 +770,11 @@ public class Conversation {
         }).start();
     }
 
-    private static void blockingMarkAllSmsMessagesAsSeen(final Context context,final boolean alsoRead) {
+    private static void blockingMarkAllSmsMessagesAsSeen(final Context context) {
         ContentResolver resolver = context.getContentResolver();
-        String condition="seen=0";
-        if(alsoRead){
-             condition += " or read=0";
-        }
         Cursor cursor = resolver.query(Sms.Inbox.CONTENT_URI,
                 SEEN_PROJECTION,
-                condition,
+                "seen=0",
                 null,
                 null);
 
@@ -805,25 +798,18 @@ public class Conversation {
 
         ContentValues values = new ContentValues(1);
         values.put("seen", 1);
-        if(alsoRead){
-           values.put("read", 1);
-        }
 
         resolver.update(Sms.Inbox.CONTENT_URI,
                 values,
-                condition,
+                "seen=0",
                 null);
     }
 
-    private static void blockingMarkAllMmsMessagesAsSeen(final Context context,final boolean alsoRead) {
+    private static void blockingMarkAllMmsMessagesAsSeen(final Context context) {
         ContentResolver resolver = context.getContentResolver();
-        String condition="seen=0";
-        if(alsoRead){
-             condition += " or read=0";
-        }
         Cursor cursor = resolver.query(Mms.Inbox.CONTENT_URI,
                 SEEN_PROJECTION,
-                condition,
+                "seen=0",
                 null,
                 null);
 
@@ -847,13 +833,10 @@ public class Conversation {
 
         ContentValues values = new ContentValues(1);
         values.put("seen", 1);
-        if(alsoRead){
-           values.put("read", 1);
-        }
 
         resolver.update(Mms.Inbox.CONTENT_URI,
                 values,
-                condition,
+                "seen=0",
                 null);
 
     }

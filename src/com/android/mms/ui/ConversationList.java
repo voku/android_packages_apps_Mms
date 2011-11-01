@@ -83,7 +83,6 @@ public class ConversationList extends ListActivity
     public static final int MENU_SEARCH               = 1;
     public static final int MENU_DELETE_ALL           = 3;
     public static final int MENU_PREFERENCES          = 4;
-    public static final int MENU_MARK_ALL_READ        = 5;
 
     // IDs of the context menu items for the list of conversations.
     public static final int MENU_DELETE               = 0;
@@ -308,11 +307,6 @@ public class ConversationList extends ListActivity
         menu.add(0, MENU_PREFERENCES, 0, R.string.menu_preferences).setIcon(
                 android.R.drawable.ic_menu_preferences);
 
-        /* Add mark all read menu */
-        menu.add(0, MENU_MARK_ALL_READ, 0, R.string.menu_mark_all_read).setIcon(
-                android.R.drawable.ic_menu_view);
-
-
         return true;
     }
 
@@ -335,9 +329,6 @@ public class ConversationList extends ListActivity
                 // The invalid threadId of -1 means all threads here.
                 confirmDeleteThread(-1L, mQueryHandler);
                 break;
-            case MENU_MARK_ALL_READ:
-                Conversation.markAllConversationsAsSeen(getApplicationContext(),true);
-                break;
             case MENU_PREFERENCES: {
                 Intent intent = new Intent(this, MessagingPreferenceActivity.class);
                 startActivityIfNeeded(intent, -1);
@@ -357,23 +348,10 @@ public class ConversationList extends ListActivity
 
         if (position == 0) {
             createNewMessage();
-        } else {
-            // Note: don't read the thread id data from the ConversationListItem view passed in.
-            // It's unreliable to read the cached data stored in the view because the ListItem
-            // can be recycled, and the same view could be assigned to a different position
-            // if you click the list item fast enough. Instead, get the cursor at the position
-            // clicked and load the data from the cursor.
-            // (ConversationListAdapter extends CursorAdapter, so getItemAtPosition() should
-            // return the cursor object, which is moved to the position passed in)
-            Cursor cursor  = (Cursor) getListView().getItemAtPosition(position);
-            Conversation conv = Conversation.from(this, cursor);
-            long tid = conv.getThreadId();
-
-            if (LOCAL_LOGV) {
-                Log.v(TAG, "onListItemClick: pos=" + position + ", view=" + v + ", tid=" + tid);
-            }
-
-            openThread(tid);
+        } else if (v instanceof ConversationListItem) {
+            ConversationListItem headerView = (ConversationListItem) v;
+            ConversationListItemData ch = headerView.getConversationHeader();
+            openThread(ch.getThreadId());
         }
     }
 

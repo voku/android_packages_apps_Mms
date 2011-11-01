@@ -1890,7 +1890,7 @@ public class ComposeMessageActivity extends Activity
             // to the ConversationList where the user can enter this in a clean manner.
             if (mWorkingMessage.isWorthSaving()) {
                 mWorkingMessage.unDiscard();    // it was discarded in onStop().
-            } else if (isRecipientsEditorVisible()) {
+            } else {
                 goToConversationList();
             }
         }
@@ -3345,10 +3345,6 @@ public class ComposeMessageActivity extends Activity
                 // Update the notification for failed messages since they
                 // may be deleted.
                 updateSendFailedNotification();
-                // Return to message list if the last message on thread is being deleted
-                if (mMsgListAdapter.getCount() == 1) {
-                    finish();
-                }
                 break;
             }
 
